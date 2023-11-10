@@ -1,60 +1,30 @@
 const express = require("express");
-const collection = require("./mongo");
 const cors = require("cors");
-const bcrypt = require("bcrypt");
+const mongoose = require("mongoose");
+const routes = require("./routes/routes");
+
 const app = express();
+
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-app.post("/", async (req, res) => {
-  const { email, password } = req.body;
+// MongoDB connection
+mongoose
+  .connect("mongodb+srv://biodun:shuga2020@cluster0.ghvftmq.mongodb.net/lazy")
+  .then(() => {
+    console.log("MongoDB connected");
+  })
+  .catch(() => {
+    console.log("Failed to connect to MongoDB");
+  });
 
-  try {
-    const user = await collection.findOne({ email: email });
+// Use the routes
+app.use("/", routes);
 
-    if (!user) {
-      res.json("notexist");
-    } else {
-      // Compare the provided password with the stored hashed password
-      const passwordMatch = await bcrypt.compare(password, user.password);
-
-      if (passwordMatch) {
-        res.json("exist");
-      } else {
-        res.json("notexist"); // or you can use a different code to indicate incorrect password
-      }
-    }
-  } catch (e) {
-    res.json("fail");
-  }
-});
-
-app.post("/signup", async (req, res) => {
-  const { email, password } = req.body;
-
-  // Hash the password before storing it
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const data = {
-    email: email,
-    password: hashedPassword, // Store the hashed password
-  };
-
-  try {
-    const check = await collection.findOne({ email: email });
-
-    if (check) {
-      res.json("exist");
-    } else {
-      res.json("notexist");
-      await collection.insertMany([data]);
-    }
-  } catch (e) {
-    res.json("fail");
-  }
-});
-
-app.listen(8000, () => {
-  console.log("port connected");
+// Server listening on port 8000
+const PORT = 8000;
+app.listen(PORT, () => {
+  console.log(`Server connected on port ${PORT}`);
 });
