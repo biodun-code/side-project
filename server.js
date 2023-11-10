@@ -12,7 +12,7 @@ app.use(cors());
 
 // MongoDB connection
 mongoose
-  .connect("mongodb+srv://biodun:shuga2020@cluster0.ghvftmq.mongodb.net/lazy")
+  .connect("")
   .then(() => {
     console.log("MongoDB connected");
   })
